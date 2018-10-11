@@ -1,0 +1,4 @@
+/home/dolaned/phowallet-core/build/CMakeFiles/edit_cache.dir
+/home/dolaned/phowallet-core/build/CMakeFiles/secp256k1.dir
+/home/dolaned/phowallet-core/build/CMakeFiles/rebuild_cache.dir
+/home/dolaned/phowallet-core/build/CMakeFiles/spvtest.dir

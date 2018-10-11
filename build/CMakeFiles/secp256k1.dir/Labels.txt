@@ -1,0 +1,13 @@
+# Target labels
+ secp256k1
+# Source files and their labels
+/home/dolaned/phowallet-core/build/CMakeFiles/secp256k1
+/home/dolaned/phowallet-core/build/CMakeFiles/secp256k1.rule
+/home/dolaned/phowallet-core/build/CMakeFiles/secp256k1-complete.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-install.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-mkdir.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-download.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-update.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-patch.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-configure.rule
+/home/dolaned/phowallet-core/build/deps/secp256k1/src/secp256k1-stamp/secp256k1-build.rule
