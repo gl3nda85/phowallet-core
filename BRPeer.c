@@ -44,9 +44,9 @@
 #include <arpa/inet.h>
 
 #if BITCOIN_TESTNET
-#define MAGIC_NUMBER 0xbbaaffee
+#define MAGIC_NUMBER 0x0809110b
 #else
-#define MAGIC_NUMBER 0xf9bcb4d2
+#define MAGIC_NUMBER 0xd2b4bcf9
 #endif
 #define HEADER_LENGTH      24
 #define MAX_MSG_LENGTH     0x02000000
@@ -465,8 +465,8 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
             time_t now = time(NULL);
             UInt256 locators[2];
             
-            BRSHA256_2(&locators[0], &msg[off + 81*(count - 1)], 80);
-            BRSHA256_2(&locators[1], &msg[off], 80);
+            BRSHA256(&locators[0], &msg[off + 81*(count - 1)], 80);
+            BRSHA256(&locators[1], &msg[off], 80);
 
             if (timestamp > 0 && timestamp + 7*24*60*60 + BLOCK_MAX_TIME_DRIFT >= ctx->earliestKeyTime) {
                 // request blocks for the remainder of the chain
@@ -476,7 +476,7 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
                     timestamp = (++last < count) ? UInt32GetLE(&msg[off + 81*last + 68]) : 0;
                 }
                 
-                BRSHA256_2(&locators[0], &msg[off + 81*(last - 1)], 80);
+                blakeHash(&locators[0], &msg[off + 81*(last - 1)], 80);
                 BRPeerSendGetblocks(peer, locators, 2, UINT256_ZERO);
             }
             else BRPeerSendGetheaders(peer, locators, 2, UINT256_ZERO);
@@ -1005,7 +1005,11 @@ static void *_peerThreadRoutine(void *arg)
                         peer_log(peer, "%s", strerror(error));
                     }
                     else if (len == msgLen) {
-                        BRSHA256_2(&hash, payload, msgLen);
+
+                        // BRSHA256_2(&hash, payload, msgLen);
+
+                        //Convert to blake serialization
+                        blakeHash(&hash, payload, msgLen);
                         
                         if (UInt32GetLE(&hash) != checksum) { // verify checksum
                             peer_log(peer, "error reading %s, invalid checksum %x, expected %x, payload length:%"PRIu32
@@ -1268,7 +1272,11 @@ void BRPeerSendMessage(BRPeer *peer, const uint8_t *msg, size_t msgLen, const ch
         off += 12;
         UInt32SetLE(&buf[off], (uint32_t)msgLen);
         off += sizeof(uint32_t);
-        BRSHA256_2(hash, msg, msgLen);
+
+        // BRSHA256_2(hash, msg, msgLen);
+        // change to work with blake hashing algo serialization
+        blakeHash(hash, msg, msgLen);
+
         memcpy(&buf[off], hash, sizeof(uint32_t));
         off += sizeof(uint32_t);
         memcpy(&buf[off], msg, msgLen);

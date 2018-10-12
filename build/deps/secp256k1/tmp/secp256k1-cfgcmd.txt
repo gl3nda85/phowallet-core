@@ -1,1 +1,0 @@
-cmd='/home/dolaned/phowallet-core/secp256k1/configure;--prefix=<INSTALL_DIR>'

@@ -999,3 +999,10 @@ void BRScrypt(void *dk, size_t dkLen, const void *pw, size_t pwLen, const void *
     mem_clean(v, 128*r*n);
     free(v);
 }
+
+void blakeHash(void *out, void *in, size_t len){
+    sph_blake256_context ctx_blake;
+    sph_blake256_init(&ctx_blake);
+    sph_blake256 (&ctx_blake, in, len);
+    sph_blake256_close(&ctx_blake, out);
+}
