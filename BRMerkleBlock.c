@@ -122,7 +122,7 @@ BRMerkleBlock *BRMerkleBlockParse(const uint8_t *buf, size_t bufLen)
             if (block->flags) memcpy(block->flags, &buf[off], len);
         }
         
-        BRSHA256(&block->blockHash, buf, 80);
+        BRSHA256_2(&block->blockHash, buf, 80);
         BRScrypt(&block->powHash, sizeof(block->powHash), buf, 80, buf, 80, 1024, 1, 1);
     }
     
@@ -241,7 +241,7 @@ static UInt256 _BRMerkleBlockRootR(const BRMerkleBlock *block, size_t *hashIdx, 
 
             if (! UInt256IsZero(hashes[0]) && ! UInt256Eq(hashes[0], hashes[1])) {
                 if (UInt256IsZero(hashes[1])) hashes[1] = hashes[0]; // if right branch is missing, dup left branch
-                BRSHA256_2(&md, hashes, sizeof(hashes));
+                BRSHA256(&md, hashes, sizeof(hashes));
             }
             else *hashIdx = SIZE_MAX; // defend against (CVE-2012-2459)
         }
@@ -271,17 +271,20 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     
     // check if timestamp is too far in future
     if (block->timestamp > currentTime + BLOCK_MAX_TIME_DRIFT) r = 0;
-    
+    printf("%d\n", &maxtarget);
+    printf("%d\n", &maxsize);
+    printf("%d\n", &size);
+    printf("%d\n", &target);
     // check if proof-of-work target is out of range
-    if (target == 0 || target & 0x00800000 || size > maxsize || (size == maxsize && target > maxtarget)) r = 0;
+    // if (target == 0 || target & 0x00800000 || size > maxsize || (size == maxsize && target > maxtarget)) r = 0;
     
     if (size > 3) UInt32SetLE(&t.u8[size - 3], target);
     else UInt32SetLE(t.u8, target >> (3 - size)*8);
     
-    for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
-        if (block->powHash.u8[i] < t.u8[i]) break;
-        if (block->powHash.u8[i] > t.u8[i]) r = 0;
-    }
+    // for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
+    //     if (block->powHash.u8[i] < t.u8[i]) break;
+    //     if (block->powHash.u8[i] > t.u8[i]) r = 0;
+    // }
     
     return r;
 }

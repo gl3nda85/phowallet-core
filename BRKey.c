@@ -141,7 +141,7 @@ int BRPrivKeyIsValid(const char *privKey)
         
         strncpy(s, privKey, sizeof(s));
         s[sizeof(s) - 2] = '?';
-        BRSHA256(data, s, sizeof(s) - 1);
+        blakeHash(data, s, sizeof(s) - 1);
         mem_clean(s, sizeof(s));
         r = (data[0] == 0);
     }
@@ -182,7 +182,7 @@ int BRKeySetPrivKey(BRKey *key, const char *privKey)
     // mini private key format
     if ((len == 30 || len == 22) && privKey[0] == 'S') {
         if (! BRPrivKeyIsValid(privKey)) return 0;
-        BRSHA256(data, privKey, strlen(privKey));
+        blakeHash(data, privKey, strlen(privKey));
         r = BRKeySetSecret(key, (UInt256 *)data, 0);
     }
     else {
@@ -277,7 +277,7 @@ UInt160 BRKeyHash160(BRKey *key)
     
     assert(key != NULL);
     len = BRKeyPubKey(key, NULL, 0);
-    if (len > 0 && secp256k1_ec_pubkey_parse(_ctx, &pk, key->pubKey, len)) BRHash160(&hash, key->pubKey, len);
+    if (len > 0 && secp256k1_ec_pubkey_parse(_ctx, &pk, key->pubKey, len)) blakeHash(&hash, key->pubKey, len);
     return hash;
 }
 
