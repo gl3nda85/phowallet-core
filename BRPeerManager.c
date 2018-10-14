@@ -1216,6 +1216,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
     assert(txHashes != NULL);
     txCount = BRMerkleBlockTxHashes(block, txHashes, txCount);
     pthread_mutex_lock(&manager->lock);
+    printf("%d\n", block->timestamp);
     prev = BRSetGet(manager->blocks, &block->prevBlock);
 
     if (prev) {
