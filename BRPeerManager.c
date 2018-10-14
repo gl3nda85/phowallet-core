@@ -65,7 +65,7 @@ static const char *dns_seeds[] = {
 // blockchain checkpoints - these are also used as starting points for partial chain downloads, so they need to be at
 // difficulty transition boundaries in order to verify the block difficulty at the immediately following transition
 static const struct { uint32_t height; const char *hash; uint32_t timestamp; uint32_t target; } checkpoint_array[] = {
-    { 630003, "0x5c95cdc3ef47864f195583cc2af80824636f2c728856c8dcc5fbb3d722fc4350", 1435666994, 0 }
+    { 630003, "5c95cdc3ef47864f195583cc2af80824636f2c728856c8dcc5fbb3d722fc4350", 1435666994, 0x000000}
 };
 
 static const char *dns_seeds[] = {
@@ -1216,7 +1216,6 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
     assert(txHashes != NULL);
     txCount = BRMerkleBlockTxHashes(block, txHashes, txCount);
     pthread_mutex_lock(&manager->lock);
-    printf("%d\n", block->timestamp);
     prev = BRSetGet(manager->blocks, &block->prevBlock);
 
     if (prev) {
@@ -1268,7 +1267,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
         peer_log(peer, "relayed orphan block %s, previous %s, last block is %s, height %"PRIu32,
                  u256_hex_encode(block->blockHash), u256_hex_encode(block->prevBlock),
                  u256_hex_encode(manager->lastBlock->blockHash), manager->lastBlock->height);
-
+        peer_log(peer, "block height", BRPeerLastBlock(peer));
         if (block->timestamp + 7*24*60*60 < time(NULL)) { // ignore orphans older than one week ago
             BRMerkleBlockFree(block);
             block = NULL;
