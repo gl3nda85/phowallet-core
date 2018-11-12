@@ -31,8 +31,8 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_PROOF_OF_WORK 0x1E00FFFF    // highest value for difficulty target (higher values are less difficult)
-#define TARGET_TIMESPAN (14*24*60*60) // the targeted timespan between difficulty target adjustments
+#define MAX_PROOF_OF_WORK 0x1e00ffff    // highest value for difficulty target (higher values are less difficult)
+#define TARGET_TIMESPAN (60*60) // the targeted timespan between difficulty target adjustments
 
 inline static int _ceil_log2(int x)
 {
@@ -121,6 +121,7 @@ BRMerkleBlock *BRMerkleBlockParse(const uint8_t *buf, size_t bufLen)
             block->flags = (off + len <= bufLen) ? malloc(len) : NULL;
             if (block->flags) memcpy(block->flags, &buf[off], len);
         }
+        printf("%d\n", bufLen);
         
         blakeHash(&block->blockHash, buf, 80);
 
@@ -130,10 +131,10 @@ BRMerkleBlock *BRMerkleBlockParse(const uint8_t *buf, size_t bufLen)
 
 
         // run reverse fuctions to reverse the byte arrays of the hashes
-        block->blockHash = UInt256Reverse(UInt256Get(&block->blockHash));
-        block->merkleRoot = UInt256Reverse(UInt256Get(&block->merkleRoot));
-        block->prevBlock = UInt256Reverse(UInt256Get(&block->prevBlock));
-
+        // block->blockHash = UInt256Reverse(UInt256Get(&block->blockHash));
+        // block->merkleRoot = UInt256Reverse(UInt256Get(&block->merkleRoot));
+        // block->prevBlock = UInt256Reverse(UInt256Get(&block->prevBlock));
+        // block->powHash = UInt256Reverse(UInt256Get(&block->powHash));
 
 
     }
@@ -272,14 +273,17 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     
     // target is in "compact" format, where the most significant byte is the size of the value in bytes, next
     // bit is the sign, and the last 23 bits is the value after having been right shifted by (size - 3)*8 bits
-    const uint32_t size = block->target >> 24, target = block->target & 0x1E00FFFF;
+    static const uint32_t maxsize = MAX_PROOF_OF_WORK >> 24, maxtarget = MAX_PROOF_OF_WORK & 0x00ffffff;
+    const uint32_t size = block->target >> 24, target = block->target & 0x00ffffff;
     size_t hashIdx = 0, flagIdx = 0;
     UInt256 merkleRoot = _BRMerkleBlockRootR(block, &hashIdx, &flagIdx, 0), t = UINT256_ZERO;
     int r = 1;
+    printf("\n");
     printf("Block hash %s\n", u256_hex_encode(block->blockHash));
     printf("Block pow hash %s\n", u256_hex_encode(block->powHash));
     printf("Block version %d\n", block->version);
     printf("Merkle root %s\n", u256_hex_encode(block->merkleRoot));
+    printf("Block hashes %d\n", sizeof(&block->hashes));
     printf("Previous Block %s\n", u256_hex_encode(block->prevBlock));
     printf("Block timestamp %d\n", block->timestamp);
     printf("Block nonce %d\n", block->nonce);
@@ -289,26 +293,26 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
    
     // check if merkle root is correct
     if (block->totalTx > 0 && ! UInt256Eq(merkleRoot, block->merkleRoot)) r = 0;
-    printf("failed validating merkleRoot %d\n", r);
+    // printf("failed validating merkleRoot %d\n", r);
     // check if timestamp is too far in future
     if (block->timestamp > currentTime + BLOCK_MAX_TIME_DRIFT) r = 0;
-    printf("block timestamp is too far in future %d\n", r);
+    // printf("block timestamp is too far in future %d\n", r);
     // check if proof-of-work target is out of range
-    if (target == 0 || (block->target & 0x00800000) || block->target > MAX_PROOF_OF_WORK) r = 0;
-    printf("proof of work target is out of range %d\n", r);
+    if (target == 0 || (target & 0x00800000) || size > maxsize || (size == maxsize && target > maxtarget)) r = 0;
+    // printf("proof of work target is out of range %d\n", r);
 
     if (size > 3) UInt32SetLE(&t.u8[size - 3], target);
     else UInt32SetLE(t.u8, target >> (3 - size)*8);
-    printf("dunno what this does %d\n", r);
 
-    // for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
-    //     if (block->blockHash.u8[i] < t.u8[i]) break;
-    //     if (block->blockHash.u8[i] > t.u8[i]) r = 0;
-    //     printf("block %d\n", block->blockHash.u8[i]);
-    //     printf("compare %d\n", t.u8[i]);
-    // }
+    for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
+        if (block->blockHash.u8[i] < t.u8[i]) break;
+        // if (block->blockHash.u8[i] > t.u8[i]) r = 0;
+        // printf("block %d\n", block->blockHash.u8[i]);
+        // printf("compare %d\n", t.u8[i]);
+    }
   
-    printf("failed checking POW %d\n", r);
+    // printf("failed checking POW %d\n", r);
+    // printf("\n");
     return r;
 }
 

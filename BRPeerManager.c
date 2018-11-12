@@ -65,7 +65,7 @@ static const char *dns_seeds[] = {
 // blockchain checkpoints - these are also used as starting points for partial chain downloads, so they need to be at
 // difficulty transition boundaries in order to verify the block difficulty at the immediately following transition
 static const struct { uint32_t height; const char *hash; uint32_t timestamp; uint32_t target; } checkpoint_array[] = {
-    { 630003, "5c95cdc3ef47864f195583cc2af80824636f2c728856c8dcc5fbb3d722fc4350", 1435666994, 0x000000}
+    { 0, "000000e79a20d718a2f2d8b98161dc6700104a22d8e9be70e8ac361ee6664b9c", 1392948641, 0x000000}
 };
 
 static const char *dns_seeds[] = {
@@ -1215,6 +1215,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
 
     assert(txHashes != NULL);
     txCount = BRMerkleBlockTxHashes(block, txHashes, txCount);
+    printf("Transaction Count %d\n", txCount);
     pthread_mutex_lock(&manager->lock);
     prev = BRSetGet(manager->blocks, &block->prevBlock);
 
@@ -1398,7 +1399,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
 
     if (block && block->height != BLOCK_UNKNOWN_HEIGHT) {
         if (block->height > manager->estimatedHeight) manager->estimatedHeight = block->height;
-
+        printf("%d\n", block->height);
         // check if the next block was received as an orphan
         orphan.prevBlock = block->blockHash;
         next = BRSetRemove(manager->orphans, &orphan);
@@ -1423,6 +1424,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
         manager->txStatusUpdate(manager->info); // notify that transaction confirmations may have changed
     }
 
+    printf("here");
     if (next) _peerRelayedBlock(info, next);
 }
 
