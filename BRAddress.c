@@ -270,7 +270,7 @@ size_t BRAddressFromScriptPubKey(char *addr, size_t addrLen, const uint8_t *scri
         // pay-to-pubkey scriptPubKey
         d = BRScriptData(elems[0], &l);
         if (l != 65 && l != 33) d = NULL;
-        if (d) blakeHash(&data[1], d, l);
+        if (d) BRHash160(&data[1], d, l);
     }
     
     return (d) ? BRBase58CheckEncode(addr, addrLen, data, sizeof(data)) : 0;
@@ -296,7 +296,7 @@ size_t BRAddressFromScriptSig(char *addr, size_t addrLen, const uint8_t *script,
         (*elems[count - 1] == 65 || *elems[count - 1] == 33)) { // pay-to-pubkey-hash scriptSig
         d = BRScriptData(elems[count - 1], &l);
         if (l != 65 && l != 33) d = NULL;
-        if (d) blakeHash(&data[1], d, l);
+        if (d) BRHash160(&data[1], d, l);
     }
     else if (count >= 2 && *elems[count - 2] <= OP_PUSHDATA4 && *elems[count - 1] <= OP_PUSHDATA4 &&
              *elems[count - 1] > 0) { // pay-to-script-hash scriptSig
@@ -305,7 +305,7 @@ size_t BRAddressFromScriptSig(char *addr, size_t addrLen, const uint8_t *script,
         data[0] = BITCOIN_SCRIPT_ADDRESS_TEST;
 #endif
         d = BRScriptData(elems[count - 1], &l);
-        if (d) blakeHash(&data[1], d, l);
+        if (d) BRHash160(&data[1], d, l);
     }
     else if (count >= 1 && *elems[count - 1] <= OP_PUSHDATA4 && *elems[count - 1] > 0) { // pay-to-pubkey scriptSig
         // TODO: implement Peter Wullie's pubKey recovery from signature

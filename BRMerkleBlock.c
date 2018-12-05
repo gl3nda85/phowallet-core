@@ -91,7 +91,7 @@ BRMerkleBlock *BRMerkleBlockParse(const uint8_t *buf, size_t bufLen)
     size_t off = 0, len = 0;
     
     assert(buf != NULL || bufLen == 0);
-    
+
     if (block) {
         block->version = UInt32GetLE(&buf[off]);
         off += sizeof(uint32_t);
@@ -121,11 +121,15 @@ BRMerkleBlock *BRMerkleBlockParse(const uint8_t *buf, size_t bufLen)
             block->flags = (off + len <= bufLen) ? malloc(len) : NULL;
             if (block->flags) memcpy(block->flags, &buf[off], len);
         }
-        printf("%d\n", bufLen);
+        // printf("buffer bufLen %d\n", bufLen);
+        // printf("off size %d\n", off);
+        // printf("block hashes Count %d\n", block->hashesCount);
+        // printf("total tx %d\n", block->totalTx);
+        // printf("len %d\n", len);
         
         blakeHash(&block->blockHash, buf, 80);
 
-        // blakeHash(&block->powHash, buf ,sizeof(block->powHash));
+        blakeHash(&block->powHash, buf ,sizeof(block->powHash));
 
         // BRScrypt(&block->powHash, sizeof(block->powHash), buf, 80, buf, 80, 1024, 1, 1);
 
@@ -278,18 +282,18 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     size_t hashIdx = 0, flagIdx = 0;
     UInt256 merkleRoot = _BRMerkleBlockRootR(block, &hashIdx, &flagIdx, 0), t = UINT256_ZERO;
     int r = 1;
-    printf("\n");
-    printf("Block hash %s\n", u256_hex_encode(block->blockHash));
-    printf("Block pow hash %s\n", u256_hex_encode(block->powHash));
-    printf("Block version %d\n", block->version);
-    printf("Merkle root %s\n", u256_hex_encode(block->merkleRoot));
-    printf("Block hashes %d\n", sizeof(&block->hashes));
-    printf("Previous Block %s\n", u256_hex_encode(block->prevBlock));
-    printf("Block timestamp %d\n", block->timestamp);
-    printf("Block nonce %d\n", block->nonce);
-    printf("Block target %d\n", block->target);
-    printf("target %d\n", target);
-    printf("Max Proof of work %d\n", MAX_PROOF_OF_WORK);
+    // printf("\n");
+    // printf("Block hash %s\n", u256_hex_encode(block->blockHash));
+    // printf("Block pow hash %s\n", u256_hex_encode(block->powHash));
+    // printf("Block version %d\n", block->version);
+    // printf("Merkle root %s\n", u256_hex_encode(block->merkleRoot));
+    // printf("Block hashes %d\n", sizeof(&block->hashes));
+    // printf("Previous Block %s\n", u256_hex_encode(block->prevBlock));
+    // printf("Block timestamp %d\n", block->timestamp);
+    // printf("Block nonce %d\n", block->nonce);
+    // printf("Block target %d\n", block->target);
+    // printf("target %d\n", target);
+    // printf("Max Proof of work %d\n", MAX_PROOF_OF_WORK);
    
     // check if merkle root is correct
     if (block->totalTx > 0 && ! UInt256Eq(merkleRoot, block->merkleRoot)) r = 0;

@@ -46,7 +46,7 @@
 #if BITCOIN_TESTNET
 #define MAGIC_NUMBER 0x0809110b
 #else
-#define MAGIC_NUMBER 0xd2b4bcf9
+#define MAGIC_NUMBER 0xd2b4bef9
 #endif
 #define HEADER_LENGTH      24
 #define MAX_MSG_LENGTH     0x02000000
@@ -444,7 +444,7 @@ static int _BRPeerAcceptTxMessage(BRPeer *peer, const uint8_t *msg, size_t msgLe
 
 static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t msgLen)
 {
-    printf("Message length %d\n", msgLen);
+    // printf("Message length %d\n", msgLen);
     BRPeerContext *ctx = (BRPeerContext *)peer;
     size_t off = 0, count = (size_t)BRVarInt(msg, msgLen, &off);
     int r = 1;
@@ -456,6 +456,7 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
     }
     else {
         peer_log(peer, "got %zu header(s)", count);
+        peer_log(peer, "earliestKeyTime: %zu",ctx->earliestKeyTime);
     
         // To improve chain download performance, if this message contains 2000 headers then request the next 2000
         // headers immediately, and switch to requesting blocks when we receive a header newer than earliestKeyTime
@@ -484,9 +485,9 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
 
             for (size_t i = 0; r && i < count; i++) {
                 BRMerkleBlock *block = BRMerkleBlockParse(&msg[off + 81*i], 81);
-                printf("Block hash %s\n", u256_hex_encode(block->blockHash));
-                printf("Merkle root %s\n", u256_hex_encode(block->merkleRoot));
-
+                // printf("Block hash %s\n", u256_hex_encode(block->blockHash));
+                // printf("Merkle root %s\n", u256_hex_encode(block->merkleRoot));
+                // printf("off size in block buffer %s\n", &msg[off + 81*i]);
                 if (!BRMerkleBlockIsValid(block, (uint32_t)now)) {
                     peer_log(peer, "invalid block header: %s", u256_hex_encode(block->blockHash));
                     BRMerkleBlockFree(block);
