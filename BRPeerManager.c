@@ -65,7 +65,7 @@ static const char *dns_seeds[] = {
 // blockchain checkpoints - these are also used as starting points for partial chain downloads, so they need to be at
 // difficulty transition boundaries in order to verify the block difficulty at the immediately following transition
 static const struct { uint32_t height; const char *hash; uint32_t timestamp; uint32_t target; } checkpoint_array[] = {
-    { 0, "000000e79a20d718a2f2d8b98161dc6700104a22d8e9be70e8ac361ee6664b9c", 1392948641, 0x000000}
+    { 0, "000000ba5cae4648b1a2b823f84cc3424e5d96d7234b39c6bb42800b2c7639be", 1381036817, 0x000000}
 };
 
 static const char *dns_seeds[] = {
@@ -1185,6 +1185,7 @@ static int _BRPeerManagerVerifyBlock(BRPeerManager *manager, BRMerkleBlock *bloc
         peer_log(peer, "relayed block with invalid difficulty target %x, blockHash: %s", block->target,
                  u256_hex_encode(block->blockHash));
         r = 0;
+
     }
 
     if (r) {
@@ -1215,7 +1216,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
 
     assert(txHashes != NULL);
     txCount = BRMerkleBlockTxHashes(block, txHashes, txCount);
-    printf("Transaction Count %d\n", txCount);
+
     pthread_mutex_lock(&manager->lock);
     prev = BRSetGet(manager->blocks, &block->prevBlock);
 
@@ -1359,6 +1360,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
             b2 = manager->lastBlock;
 
             while (b && b2 && ! BRMerkleBlockEq(b, b2)) { // walk back to where the fork joins the main chain
+                printf("Walking back \n");
                 b = BRSetGet(manager->blocks, &b->prevBlock);
                 if (b && b->height < b2->height) b2 = BRSetGet(manager->blocks, &b2->prevBlock);
             }
@@ -1399,7 +1401,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
 
     if (block && block->height != BLOCK_UNKNOWN_HEIGHT) {
         if (block->height > manager->estimatedHeight) manager->estimatedHeight = block->height;
-        printf("%d\n", block->height);
+        // printf("%d\n", block->height);
         // check if the next block was received as an orphan
         orphan.prevBlock = block->blockHash;
         next = BRSetRemove(manager->orphans, &orphan);
@@ -1423,8 +1425,6 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
         manager->txStatusUpdate) {
         manager->txStatusUpdate(manager->info); // notify that transaction confirmations may have changed
     }
-
-    printf("here");
     if (next) _peerRelayedBlock(info, next);
 }
 

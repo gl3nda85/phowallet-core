@@ -2539,6 +2539,7 @@ int main(int argc, const char *argv[])
     int r = BRRunTests();
     
    int err = 0;
+   int latestBlockTime = 1544009940;
    UInt512 seed = UINT512_ZERO;
    BRMasterPubKey mpk = BR_MASTER_PUBKEY_NONE;
    BRWallet *wallet;
@@ -2552,7 +2553,7 @@ int main(int argc, const char *argv[])
    BRWalletSetCallbacks(wallet, wallet, walletBalanceChanged, walletTxAdded, walletTxUpdated, walletTxDeleted);
    printf("wallet created with first receive address: %s\n", BRWalletReceiveAddress(wallet).s);
 
-   manager = BRPeerManagerNew(wallet, BIP39_CREATION_TIME, NULL, 0, NULL, 0);
+   manager = BRPeerManagerNew(wallet, latestBlockTime, NULL, 0, NULL, 0);
    BRPeerManagerSetCallbacks(manager, manager, syncStarted, syncStopped, txStatusUpdate, NULL, NULL, NULL, NULL);
 
    BRPeerManagerConnect(manager);
