@@ -97,6 +97,9 @@ inline static size_t BRMerkleBlockHash(const void *block)
 // true if block and otherBlock have equal blockHash values
 inline static int BRMerkleBlockEq(const void *block, const void *otherBlock)
 {
+    if (block == NULL || otherBlock == NULL) {
+        return 0;
+    }
     return (block == otherBlock ||
             UInt256Eq(((const BRMerkleBlock *)block)->blockHash, ((const BRMerkleBlock *)otherBlock)->blockHash));
 }
